@@ -77,14 +77,16 @@ app.use((req, res, next) => {
 // Centralized Error Handler
 app.use(errorHandler);
 
-// Start the server
-const startServer = async () => {
-  await connectDB();
-  await seedInitialData();
+// Initialize DB Connection
+connectDB().then(() => {
+  seedInitialData();
+});
 
+// Start server if run directly
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
-};
+}
 
-startServer();
+module.exports = app;
