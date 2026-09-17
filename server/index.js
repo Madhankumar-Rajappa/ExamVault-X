@@ -42,6 +42,12 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+// Database connection middleware
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/question-papers", questionPaperRoutes);

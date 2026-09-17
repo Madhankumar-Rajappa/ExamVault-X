@@ -1,18 +1,31 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const os = require("os");
 
-// Create uploads directory if it does not exist
-const uploadDirectory = path.join(__dirname, "..", "uploads");
+// Secure upload directory path supporting serverless & cloud environments
+const getUploadDir = () => {
+  const isServerless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+  const targetDir = isServerless
+    ? path.join(os.tmpdir(), "uploads")
+    : path.join(__dirname, "..", "uploads");
 
-if (!fs.existsSync(uploadDirectory)) {
-  fs.mkdirSync(uploadDirectory, { recursive: true });
-}
+  if (!fs.existsSync(targetDir)) {
+    try {
+      fs.mkdirSync(targetDir, { recursive: true });
+    } catch (e) {
+      console.warn("Upload dir creation note:", e.message);
+    }
+  }
+  return targetDir;
+};
+
+const uploadDirectory = getUploadDir();
 
 // Store uploaded files with generated names
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDirectory);
+    cb(null, getUploadDir());
   },
 
   filename: (req, file, cb) => {
