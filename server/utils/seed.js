@@ -13,8 +13,8 @@ const seedInitialData = async () => {
     const hashedPassword = await hashPassword("ExamVault2026!");
 
     for (const u of defaultUsers) {
-      const exists = await User.findOne({ email: u.email });
-      if (!exists) {
+      let userDoc = await User.findOne({ email: u.email });
+      if (!userDoc) {
         await User.create({
           name: u.name,
           email: u.email,
@@ -22,7 +22,13 @@ const seedInitialData = async () => {
           role: u.role,
           isActive: true,
         });
-        console.log(`🌱 Seeded default user: ${u.email} (${u.role})`);
+        console.log(`🌱 Created demo user: ${u.email} (${u.role})`);
+      } else {
+        userDoc.password = hashedPassword;
+        userDoc.role = u.role;
+        userDoc.isActive = true;
+        await userDoc.save();
+        console.log(`🌱 Verified/reset demo user: ${u.email} (${u.role})`);
       }
     }
   } catch (error) {
