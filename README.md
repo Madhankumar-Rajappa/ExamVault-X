@@ -130,11 +130,11 @@ Example:
 
 ```env
 MONGO_URI=mongodb+srv://<username>:<password>@examvault-cluster.jcwdozp.mongodb.net/examvault
-```
+```env
 
 ---
 
-### MongoDB Atlas Configuration
+## 6. MongoDB Atlas Configuration
 
 The MongoDB Atlas setup includes:
 
