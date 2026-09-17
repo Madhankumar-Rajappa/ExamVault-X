@@ -130,7 +130,6 @@ Example:
 
 ```env
 MONGO_URI=mongodb+srv://<username>:<password>@examvault-cluster.jcwdozp.mongodb.net/examvault
-```env
 
 ---
 
