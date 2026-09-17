@@ -21,10 +21,11 @@ const PORT = process.env.PORT || 5000;
 // Security middleware
 app.use(helmet());
 
-// Allow frontend requests
+// Enable CORS for all origins (Localhost, Vercel preview domains & production)
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: true,
+    credentials: true,
   })
 );
 
@@ -34,7 +35,7 @@ app.use(express.json({ limit: "10kb" }));
 // Basic rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   message: {
     message: "Too many requests. Please try again later.",
   },
@@ -42,21 +43,25 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Database connection middleware
+// Database connection middleware for serverless requests
 app.use(async (req, res, next) => {
-  await connectDB();
+  try {
+    await connectDB();
+  } catch (e) {
+    console.error("DB Middleware warning:", e.message);
+  }
   next();
 });
 
-// API routes
-app.use("/api/auth", authRoutes);
-app.use("/api/question-papers", questionPaperRoutes);
-app.use("/api/audit-logs", auditRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/dashboard", dashboardRoutes);
+// API routes (supports both /api prefix and direct serverless route rewrites)
+app.use(["/api/auth", "/auth"], authRoutes);
+app.use(["/api/question-papers", "/question-papers"], questionPaperRoutes);
+app.use(["/api/audit-logs", "/audit-logs"], auditRoutes);
+app.use(["/api/users", "/users"], userRoutes);
+app.use(["/api/dashboard", "/dashboard"], dashboardRoutes);
 
 // Home route
-app.get("/", (req, res) => {
+app.get(["/", "/api"], (req, res) => {
   res.json({
     message: "ExamVault-X backend is running",
     status: "success",
@@ -64,7 +69,7 @@ app.get("/", (req, res) => {
 });
 
 // Health-check route
-app.get("/api/health", (req, res) => {
+app.get(["/api/health", "/health"], (req, res) => {
   res.json({
     service: "ExamVault-X API",
     status: "healthy",
@@ -83,7 +88,7 @@ app.use((req, res, next) => {
 // Centralized Error Handler
 app.use(errorHandler);
 
-// Initialize DB Connection
+// Initialize DB Connection and Seed Data
 connectDB().then(() => {
   seedInitialData();
 });

@@ -24,7 +24,7 @@ const connectDB = async () => {
 
   try {
     const db = await mongoose.connect(primaryUri || fallbackUri, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 15000,
     });
     isConnected = db.connections[0].readyState;
     console.log("✔ MongoDB Atlas connected successfully.");
