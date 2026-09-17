@@ -116,11 +116,34 @@ const loginUser = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // Find the user and include the hidden password field
-    const user = await User.findOne({
+    let user = await User.findOne({
       email: normalizedEmail,
     }).select("+password");
 
-    // Do not reveal whether the email exists
+    // Auto-provision demo account on-demand if database is fresh/empty
+    if (!user) {
+      const demoAccounts = {
+        "admin@examvault.edu": { name: "System Administrator", role: "admin" },
+        "setter@examvault.edu": { name: "Question Setter", role: "question_setter" },
+        "reviewer@examvault.edu": { name: "Faculty Reviewer", role: "reviewer" },
+        "student@examvault.edu": { name: "Student User", role: "student" },
+      };
+
+      if (demoAccounts[normalizedEmail]) {
+        const info = demoAccounts[normalizedEmail];
+        const hashedPassword = await hashPassword("ExamVault2026!");
+        const newDemoUser = await User.create({
+          name: info.name,
+          email: normalizedEmail,
+          password: hashedPassword,
+          role: info.role,
+          isActive: true,
+        });
+        user = await User.findById(newDemoUser._id).select("+password");
+      }
+    }
+
+    // Check account existence and active status
     if (!user || !user.isActive) {
       return res.status(401).json({
         message: "Invalid email or password.",
