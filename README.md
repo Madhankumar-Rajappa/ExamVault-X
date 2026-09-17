@@ -131,6 +131,7 @@ Example:
 ```env
 MONGO_URI=mongodb+srv://<username>:<password>@examvault-cluster.jcwdozp.mongodb.net/examvault
 
+---
 
 ### MongoDB Atlas Configuration
 
@@ -143,6 +144,8 @@ The MongoDB Atlas setup includes:
 - Creating the `examvault` database.
 - Copying the MongoDB connection string.
 - Adding the connection string to the backend `.env` file.
+
+---
 
 ### File Upload and Validation
 
