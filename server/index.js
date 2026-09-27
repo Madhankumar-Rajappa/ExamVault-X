@@ -16,6 +16,9 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
+// Trust proxy for Vercel / reverse proxies
+app.set("trust proxy", 1);
+
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
@@ -32,10 +35,11 @@ app.use(
 // Parse JSON request bodies
 app.use(express.json({ limit: "10kb" }));
 
-// Basic rate limiting
+// Basic rate limiting (configured safely for proxy/serverless environments)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
+  validate: { xForwardedForHeader: false },
   message: {
     message: "Too many requests. Please try again later.",
   },
