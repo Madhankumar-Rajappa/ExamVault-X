@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const dns = require("dns");
 
-try {
-  dns.setServers(["8.8.8.8", "1.1.1.1"]);
-} catch (e) {
-  // Ignore DNS set errors in restricted serverless containers
+if (!process.env.VERCEL) {
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1"]);
+  } catch (e) {
+    // Ignore DNS set errors in restricted environments
+  }
 }
 
 let isConnected = false;

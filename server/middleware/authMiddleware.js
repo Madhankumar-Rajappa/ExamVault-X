@@ -13,7 +13,10 @@ const protect = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "examvault_default_secret_key_2026"
+    );
 
     // Fetch user from DB to verify existence & active status
     const user = await User.findById(decoded.id).select("-password");
