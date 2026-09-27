@@ -1,12 +1,10 @@
 const mongoose = require("mongoose");
 const dns = require("dns");
 
-if (!process.env.VERCEL) {
-  try {
-    dns.setServers(["8.8.8.8", "1.1.1.1"]);
-  } catch (e) {
-    // Ignore DNS set errors in restricted environments
-  }
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (e) {
+  // Ignore DNS set errors in restricted environments
 }
 
 let isConnected = false;
@@ -15,6 +13,10 @@ const connectDB = async () => {
   if (isConnected || mongoose.connection.readyState >= 1) {
     return;
   }
+
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1"]);
+  } catch (e) {}
 
   const primaryUri = process.env.MONGO_URI;
   const fallbackUri = process.env.LOCAL_MONGO_URI || "mongodb://127.0.0.1:27017/examvault";
