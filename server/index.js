@@ -89,9 +89,13 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 // Initialize DB Connection and Seed Data
-connectDB().then(() => {
-  seedInitialData();
-});
+connectDB()
+  .then(() => {
+    seedInitialData();
+  })
+  .catch((err) => {
+    console.error("Initialization error:", err.message);
+  });
 
 // Start server if run directly
 if (require.main === module) {

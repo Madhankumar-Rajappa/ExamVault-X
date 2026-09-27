@@ -19,19 +19,22 @@ const connectDB = async () => {
   const primaryUri = process.env.MONGO_URI;
   const fallbackUri = process.env.LOCAL_MONGO_URI || "mongodb://127.0.0.1:27017/examvault";
 
-  if (!primaryUri && !fallbackUri) {
-    console.error("❌ MONGO_URI environment variable is not defined.");
-    return;
+  if (process.env.VERCEL && !primaryUri) {
+    const msg = "MONGO_URI environment variable is missing in Vercel settings.";
+    console.error("❌ " + msg);
+    throw new Error(msg);
   }
 
+  const targetUri = primaryUri || fallbackUri;
+
   try {
-    const db = await mongoose.connect(primaryUri || fallbackUri, {
-      serverSelectionTimeoutMS: 15000,
+    const db = await mongoose.connect(targetUri, {
+      serverSelectionTimeoutMS: 5000,
     });
     isConnected = db.connections[0].readyState;
-    console.log("✔ MongoDB Atlas connected successfully.");
+    console.log("✔ MongoDB connected successfully.");
   } catch (primaryError) {
-    console.warn("⚠️ MongoDB Atlas connection error:", primaryError.message);
+    console.warn("⚠️ Primary MongoDB connection error:", primaryError.message);
     
     // Only attempt local fallback when running locally (not on Vercel)
     if (!process.env.VERCEL) {
@@ -44,6 +47,8 @@ const connectDB = async () => {
       } catch (fallbackError) {
         console.error("❌ Both MongoDB Atlas and Local MongoDB connections failed.");
       }
+    } else {
+      throw primaryError;
     }
   }
 };
